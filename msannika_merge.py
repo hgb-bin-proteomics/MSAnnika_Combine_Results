@@ -20,6 +20,7 @@ import argparse
 import pandas as pd
 
 from typing import List
+from typing import Dict
 
 def merge(files: List[str]) -> pd.DataFrame:
 
@@ -54,7 +55,7 @@ def merge(files: List[str]) -> pd.DataFrame:
     return pd.concat(rows, ignore_index = True, axis = 1, names = columns).T
 
 
-def main(argv = None) -> None:
+def main(argv = None) -> Dict[str, pd.DataFrame]:
     parser = argparse.ArgumentParser()
     parser.add_argument(metavar = "f",
                         dest = "files",
@@ -78,6 +79,9 @@ def main(argv = None) -> None:
 
     merged_df = merge(args.files)
 
+    result_dict = {"CSMs_merged": merged_df, "CSMs_merged_validated": None,
+                   "Crosslinks": None, "Crosslinks_validated": None}
+
     if args.output is not None:
         merged_df.to_excel(args.output.rstrip(".xlsx") + "_merged.xlsx", sheet_name = "CSMs", index = False)
     else:
@@ -96,8 +100,11 @@ def main(argv = None) -> None:
         from msannika_fdr import MSAnnika_Crosslink_Validator as xl_val
 
         validated_csms = csm_val.validate(merged_df, args.fdr)
+        result_dict["CSMs_merged_validated"] = validated_csms
         crosslinks = grouper.group(merged_df)
+        result_dict["Crosslinks"] = crosslinks
         validated_crosslinks = xl_val.validate(crosslinks, args.fdr)
+        result_dict["Crosslinks_validated"] = validated_crosslinks
 
         if args.output is not None:
             validated_csms.to_excel(args.output.rstrip(".xlsx") + "_merged_validated.xlsx", sheet_name = "CSMs", index = False)
@@ -109,6 +116,7 @@ def main(argv = None) -> None:
             validated_crosslinks.to_excel("Crosslinks_validated.xlsx", sheet_name = "Crosslinks", index = False)
 
     print("Done!")
+    return result_dict
 
 if __name__ == "__main__":
-    main()
+    r = main()
