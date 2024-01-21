@@ -36,6 +36,9 @@ optional arguments:
                         the MS Annika FDR module will be downloaded to calculate
                         FDR.
                         Default: None
+  -o PREFIX, --output PREFIX
+                        Prefix of the output file(s).
+                        Default: None
   -h, --help            show this help message and exit
   --version             show program's version number and exit
 """
@@ -85,7 +88,7 @@ def main(argv = None) -> Dict[str, pd.DataFrame]:
     parser = argparse.ArgumentParser()
     parser.add_argument(metavar = "f",
                         dest = "files",
-                        help = "Name/Path of the MS Annika result files to process.",
+                        help = "Name/Path of the MS Annika CSM result files to process.",
                         type = str,
                         nargs = "+")
     parser.add_argument("-fdr", "--false_discovery_rate",
@@ -96,7 +99,7 @@ def main(argv = None) -> Dict[str, pd.DataFrame]:
     parser.add_argument("-o", "--output",
                         dest = "output",
                         default = None,
-                        help = "Name of the output file.",
+                        help = "Prefix of the output file(s).",
                         type = str)
     parser.add_argument("--version",
                         action = "version",
@@ -109,13 +112,13 @@ def main(argv = None) -> Dict[str, pd.DataFrame]:
                    "Crosslinks": None, "Crosslinks_validated": None}
 
     if args.output is not None:
-        merged_df.to_excel(args.output.rstrip(".xlsx") + "_merged.xlsx", sheet_name = "CSMs", index = False)
+        merged_df.to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_merged.xlsx", sheet_name = "CSMs", index = False)
     else:
         merged_df.to_excel("CSMs_merged.xlsx", sheet_name = "CSMs", index = False)
 
     if args.fdr is not None:
 
-        print(f"Validating using {args.fdr} FDR...")
+        print("Validating using MS Annika FDR...")
 
         import urllib.request as ur
         msannika_fdr_url = "https://raw.githubusercontent.com/hgb-bin-proteomics/MSAnnika_FDR/master/msannika_fdr.py"
@@ -133,9 +136,9 @@ def main(argv = None) -> Dict[str, pd.DataFrame]:
         result_dict["Crosslinks_validated"] = validated_crosslinks
 
         if args.output is not None:
-            validated_csms.to_excel(args.output.rstrip(".xlsx") + "_merged_validated.xlsx", sheet_name = "CSMs", index = False)
-            crosslinks.to_excel(args.output.rstrip(".xlsx") + "_crosslinks.xlsx", sheet_name = "Crosslinkss", index = False)
-            validated_crosslinks.to_excel(args.output.rstrip(".xlsx") + "_crosslinks_validated.xlsx", sheet_name = "Crosslinks", index = False)
+            validated_csms.to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_merged_validated.xlsx", sheet_name = "CSMs", index = False)
+            crosslinks.to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_crosslinks.xlsx", sheet_name = "Crosslinks", index = False)
+            validated_crosslinks.to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_crosslinks_validated.xlsx", sheet_name = "Crosslinks", index = False)
         else:
             validated_csms.to_excel("CSMs_merged_validated.xlsx", sheet_name = "CSMs", index = False)
             crosslinks.to_excel("Crosslinks.xlsx", sheet_name = "Crosslinks", index = False)
