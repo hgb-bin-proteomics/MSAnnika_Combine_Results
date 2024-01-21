@@ -7,7 +7,7 @@
 
 # version tracking
 __version = "1.0.0"
-__date = "2024-01-09"
+__date = "2024-01-21"
 
 # REQUIREMENTS
 # pip install pandas
@@ -15,7 +15,33 @@ __date = "2024-01-09"
 
 ######################
 
-# import packages
+"""
+DESCRIPTION:
+A script to combine results from several MS Annika searches.
+USAGE:
+msannika_merge.py f [f ...]
+                    [-fdr FDR][--false_discovery_rate FDR]
+                    [-h][--help]
+                    [--version]
+positional arguments:
+  f                     MS Annika result files in Microsoft Excel format (.xlsx)
+                        to process. MS Annika result files have to be
+                        unvalidated CSMs including decoys!
+optional arguments:
+  -fdr FDR, --false_discovery_rate FDR
+                        False discovery rate to validate results for. Supports
+                        both percentage input (e.g. 1) or fraction input (e.g.
+                        0.01). By default not set and results will only be
+                        merged. Validation requires internet connection because
+                        the MS Annika FDR module will be downloaded to calculate
+                        FDR.
+                        Default: None
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+"""
+
+######################
+
 import argparse
 import pandas as pd
 
