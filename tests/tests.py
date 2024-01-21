@@ -19,6 +19,8 @@ def test1_msannika_merge():
     assert result["CSMs_merged"].shape[0] == len(result["CSMs_merged"]["First Scan"].unique().tolist())
 
     # check that validated CSMs fullfill FDR < 0.01
+    import pandas as pd
+    
     def get_decoy_flag(row: pd.Series) -> bool:
         return True if "D" in row["Alpha T/D"] or "D" in row["Beta T/D"] else False
 
