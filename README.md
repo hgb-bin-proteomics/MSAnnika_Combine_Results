@@ -74,6 +74,32 @@ will automatically be divided by 100):
 python msannika_merge.py DSSO_CSMs.xlsx ncDSSO_CSMs.xlsx -fdr 1
 ```
 
+It is also possible to only validate CSMs and not validate crosslinks by adding
+the flag `-csms` to the command:
+
+```bash
+python msannika_merge.py DSSO_CSMs.xlsx ncDSSO_CSMs.xlsx -fdr 0.01 -csms
+```
+
+The following files will be generated:
+- `CSMs_merged.xlsx`: The merged CSMs from all given files.
+- `CSMs_merged_validated.xlsx`: The merged CSMs that are above the estimated 1%
+FDR threshold.
+- `Crosslinks.xlsx`: The crosslinks that result from grouping the merged CSMs.
+
+The same also works for crosslinks by adding the flag `-crosslinks` which will
+only validate crosslinks but not CSMs:
+
+```bash
+python msannika_merge.py DSSO_CSMs.xlsx ncDSSO_CSMs.xlsx -fdr 0.01 -crosslinks
+```
+
+The following files will be generated:
+- `CSMs_merged.xlsx`: The merged CSMs from all given files.
+- `Crosslinks.xlsx`: The crosslinks that result from grouping the merged CSMs.
+- `Crosslinks_validated.xlsx`: The crosslinks that are above the estimated 1%
+FDR threshold.
+
 ## Parameters
 
 ```python
@@ -83,6 +109,9 @@ A script to combine results from several MS Annika searches.
 USAGE:
 msannika_merge.py f [f ...]
                     [-fdr FDR][--false_discovery_rate FDR]
+                    [-o PREFIX][--output PREFIX]
+                    [-csms][--csms]
+                    [-crosslinks][--crosslinks]
                     [-h][--help]
                     [--version]
 positional arguments:
@@ -101,6 +130,12 @@ optional arguments:
   -o PREFIX, --output PREFIX
                         Prefix of the output file(s).
                         Default: None
+-csms, --csms
+                        Only validate CSMs and not crosslinks.
+                        Default: False
+-crosslinks, --crosslinks
+                        Only validate crosslinks and not CSMs.
+                        Default: False
   -h, --help            show this help message and exit
   --version             show program's version number and exit
 """

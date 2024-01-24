@@ -6,8 +6,8 @@
 # micha.birklbauer@gmail.com
 
 # version tracking
-__version = "1.0.0"
-__date = "2024-01-21"
+__version = "1.1.0"
+__date = "2024-01-24"
 
 # REQUIREMENTS
 # pip install pandas
@@ -21,6 +21,9 @@ A script to combine results from several MS Annika searches.
 USAGE:
 msannika_merge.py f [f ...]
                     [-fdr FDR][--false_discovery_rate FDR]
+                    [-o PREFIX][--output PREFIX]
+                    [-csms][--csms]
+                    [-crosslinks][--crosslinks]
                     [-h][--help]
                     [--version]
 positional arguments:
@@ -39,12 +42,19 @@ optional arguments:
   -o PREFIX, --output PREFIX
                         Prefix of the output file(s).
                         Default: None
+-csms, --csms
+                        Only validate CSMs and not crosslinks.
+                        Default: False
+-crosslinks, --crosslinks
+                        Only validate crosslinks and not CSMs.
+                        Default: False
   -h, --help            show this help message and exit
   --version             show program's version number and exit
 """
 
 ######################
 
+import os
 import argparse
 import pandas as pd
 
@@ -101,6 +111,16 @@ def main(argv = None) -> Dict[str, pd.DataFrame]:
                         default = None,
                         help = "Prefix of the output file(s).",
                         type = str)
+    parser.add_argument("-csms", "--csms",
+                        action = "store_true",
+                        dest = "csms",
+                        default = False,
+                        help = "Only validate CSMs (not crosslinks).")
+    parser.add_argument("-crosslinks", "--crosslinks",
+                        action = "store_true",
+                        dest = "csms",
+                        default = False,
+                        help = "Only validate crosslinks (not CSMs).")
     parser.add_argument("--version",
                         action = "version",
                         version = __version)
@@ -120,29 +140,41 @@ def main(argv = None) -> Dict[str, pd.DataFrame]:
 
         print("Validating using MS Annika FDR...")
 
-        import urllib.request as ur
-        msannika_fdr_url = "https://raw.githubusercontent.com/hgb-bin-proteomics/MSAnnika_FDR/master/msannika_fdr.py"
-        ur.urlretrieve(msannika_fdr_url, "msannika_fdr.py")
+        if not os.path.isfile("msannika_fdr.py"):
+            import urllib.request as ur
+            msannika_fdr_url = "https://raw.githubusercontent.com/hgb-bin-proteomics/MSAnnika_FDR/master/msannika_fdr.py"
+            ur.urlretrieve(msannika_fdr_url, "msannika_fdr.py")
+            print("Downloaded MS Annika FDR script!")
 
         from msannika_fdr import MSAnnika_CSM_Grouper as grouper
         from msannika_fdr import MSAnnika_CSM_Validator as csm_val
         from msannika_fdr import MSAnnika_Crosslink_Validator as xl_val
 
-        validated_csms = csm_val.validate(merged_df, args.fdr)
-        result_dict["CSMs_merged_validated"] = validated_csms
+        if not args.crosslinks:
+            validated_csms = csm_val.validate(merged_df, args.fdr)
+            result_dict["CSMs_merged_validated"] = validated_csms
+
         crosslinks = grouper.group(merged_df)
         result_dict["Crosslinks"] = crosslinks
-        validated_crosslinks = xl_val.validate(crosslinks, args.fdr)
-        result_dict["Crosslinks_validated"] = validated_crosslinks
+
+        if not args.csms:
+            validated_crosslinks = xl_val.validate(crosslinks, args.fdr)
+            result_dict["Crosslinks_validated"] = validated_crosslinks
 
         if args.output is not None:
-            validated_csms.to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_merged_validated.xlsx", sheet_name = "CSMs", index = False)
-            crosslinks.to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_crosslinks.xlsx", sheet_name = "Crosslinks", index = False)
-            validated_crosslinks.to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_crosslinks_validated.xlsx", sheet_name = "Crosslinks", index = False)
+            if result_dict["CSMs_merged_validated"] is not None:
+                result_dict["CSMs_merged_validated"].to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_merged_validated.xlsx", sheet_name = "CSMs", index = False)
+            if result_dict["Crosslinks"] is not None:
+                result_dict["Crosslinks"].to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_crosslinks.xlsx", sheet_name = "Crosslinks", index = False)
+            if result_dict["Crosslinks_validated"] is not None:
+                result_dict["Crosslinks_validated"].to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_crosslinks_validated.xlsx", sheet_name = "Crosslinks", index = False)
         else:
-            validated_csms.to_excel("CSMs_merged_validated.xlsx", sheet_name = "CSMs", index = False)
-            crosslinks.to_excel("Crosslinks.xlsx", sheet_name = "Crosslinks", index = False)
-            validated_crosslinks.to_excel("Crosslinks_validated.xlsx", sheet_name = "Crosslinks", index = False)
+            if result_dict["CSMs_merged_validated"] is not None:
+                result_dict["CSMs_merged_validated"].to_excel("CSMs_merged_validated.xlsx", sheet_name = "CSMs", index = False)
+            if result_dict["Crosslinks"] is not None:
+                result_dict["Crosslinks"].to_excel("Crosslinks.xlsx", sheet_name = "Crosslinks", index = False)
+            if result_dict["Crosslinks_validated"] is not None:
+                result_dict["Crosslinks_validated"].to_excel("Crosslinks_validated.xlsx", sheet_name = "Crosslinks", index = False)
 
     print("Done!")
     return result_dict

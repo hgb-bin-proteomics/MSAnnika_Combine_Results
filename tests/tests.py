@@ -20,7 +20,7 @@ def test1_msannika_merge():
 
     # check that validated CSMs fullfill FDR < 0.01
     import pandas as pd
-    
+
     def get_decoy_flag(row: pd.Series) -> bool:
         return True if "D" in row["Alpha T/D"] or "D" in row["Beta T/D"] else False
 
@@ -36,3 +36,33 @@ def test1_msannika_merge():
 
     # check that validated Crosslinks fullfill FDR < 0.01
     assert result["Crosslinks_validated"][result["Crosslinks_validated"]["Decoy"] == True].shape[0] / result["Crosslinks_validated"][result["Crosslinks_validated"]["Decoy"] == False].shape[0] < 0.01
+
+# test 2
+def test2_msannika_merge():
+
+    from msannika_merge import main
+
+    result = main(["DSSO_CSMs.xlsx", "ncDSSO_CSMs.xlsx", "-fdr", "0.01", "-csms"])
+
+    assert result["CSMs_merged"] is not None
+
+    assert result["CSMs_merged_validated"] is not None
+
+    assert result["Crosslinks"] is not None
+
+    assert result["Crosslinks_validated"] is None
+
+# test 3
+def test3_msannika_merge():
+
+    from msannika_merge import main
+
+    result = main(["DSSO_CSMs.xlsx", "ncDSSO_CSMs.xlsx", "-fdr", "0.01", "-crosslinks"])
+
+    assert result["CSMs_merged"] is not None
+
+    assert result["CSMs_merged_validated"] is None
+
+    assert result["Crosslinks"] is not None
+
+    assert result["Crosslinks_validated"] is not None
