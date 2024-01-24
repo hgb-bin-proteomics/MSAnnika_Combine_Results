@@ -6,7 +6,7 @@
 # micha.birklbauer@gmail.com
 
 # version tracking
-__version = "1.1.0"
+__version = "1.1.1"
 __date = "2024-01-24"
 
 # REQUIREMENTS
@@ -132,7 +132,8 @@ def main(argv = None) -> Dict[str, pd.DataFrame]:
                    "Crosslinks": None, "Crosslinks_validated": None}
 
     if args.output is not None:
-        merged_df.to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_merged.xlsx", sheet_name = "CSMs", index = False)
+        o = args.output if ".xlsx" not in args.output else ".xlsx".join(args.output.split(".xlsx")[:-1])
+        merged_df.to_excel(o + "_merged.xlsx", sheet_name = "CSMs", index = False)
     else:
         merged_df.to_excel("CSMs_merged.xlsx", sheet_name = "CSMs", index = False)
 
@@ -162,12 +163,13 @@ def main(argv = None) -> Dict[str, pd.DataFrame]:
             result_dict["Crosslinks_validated"] = validated_crosslinks
 
         if args.output is not None:
+            o = args.output if ".xlsx" not in args.output else ".xlsx".join(args.output.split(".xlsx")[:-1])
             if result_dict["CSMs_merged_validated"] is not None:
-                result_dict["CSMs_merged_validated"].to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_merged_validated.xlsx", sheet_name = "CSMs", index = False)
+                result_dict["CSMs_merged_validated"].to_excel(o + "_merged_validated.xlsx", sheet_name = "CSMs", index = False)
             if result_dict["Crosslinks"] is not None:
-                result_dict["Crosslinks"].to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_crosslinks.xlsx", sheet_name = "Crosslinks", index = False)
+                result_dict["Crosslinks"].to_excel(o + "_crosslinks.xlsx", sheet_name = "Crosslinks", index = False)
             if result_dict["Crosslinks_validated"] is not None:
-                result_dict["Crosslinks_validated"].to_excel(".xlsx".join(args.output.split(".xlsx")[:-1]) + "_crosslinks_validated.xlsx", sheet_name = "Crosslinks", index = False)
+                result_dict["Crosslinks_validated"].to_excel(o + "_crosslinks_validated.xlsx", sheet_name = "Crosslinks", index = False)
         else:
             if result_dict["CSMs_merged_validated"] is not None:
                 result_dict["CSMs_merged_validated"].to_excel("CSMs_merged_validated.xlsx", sheet_name = "CSMs", index = False)
