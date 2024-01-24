@@ -118,7 +118,7 @@ def main(argv = None) -> Dict[str, pd.DataFrame]:
                         help = "Only validate CSMs (not crosslinks).")
     parser.add_argument("-crosslinks", "--crosslinks",
                         action = "store_true",
-                        dest = "csms",
+                        dest = "crosslinks",
                         default = False,
                         help = "Only validate crosslinks (not CSMs).")
     parser.add_argument("--version",
